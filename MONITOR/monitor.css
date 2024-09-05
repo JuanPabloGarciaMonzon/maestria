@@ -1,0 +1,183 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    background-color: #f9f9f9;
+}
+
+header {
+    background: #333;
+    color: white;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+nav ul li a:hover {
+    color: #ddd;
+}
+
+main {
+    padding-top: 60px; /* Make space for the fixed header */
+}
+
+section {
+    padding: 60px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hero {
+    background: url('https://source.unsplash.com/1600x900/?technology') no-repeat center center/cover;
+    color: white;
+    text-align: center;
+    padding: 150px 20px;
+    border-radius: 8px;
+}
+
+.features {
+    background-color: #2ecc71;
+}
+
+.network, .proximity, .light {
+    animation: backgroundColorChange 10s infinite;
+}
+
+@keyframes backgroundColorChange {
+    0% { background-color: #ff4c33; }
+    50% { background-color: #fff933; }
+    100% { background-color: #2ecc71; }
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+footer {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    background-color: #f8f9fa; /* Fondo claro y atractivo */
+    border: 1px solid #dee2e6; /* Borde gris claro */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    max-width: 300px; /* Ancho máximo */
+    width: 100%; /* Ancho completo en pantallas pequeñas */
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Transición para hover */
+    margin-bottom: 20px; /* Espacio en la parte inferior */
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada en hover */
+    transform: translateY(-5px); /* Elevación en hover */
+}
+
+.card-header {
+    background-color: #007bff; /* Fondo azul */
+    color: black; /* Texto blanco */
+    padding: 10px; /* Espaciado interno */
+    border-bottom: 1px solid #dee2e6; /* Borde inferior */
+    border-top-left-radius: 10px; /* Bordes redondeados en la parte superior */
+    border-top-right-radius: 10px; /* Bordes redondeados en la parte superior */
+}
+
+.card-body {
+    padding: 15px; /* Espaciado interno */
+    color: #495057; /* Color del texto */
+}
+
+.card-body p {
+    margin: 10px 0; /* Espaciado en los párrafos */
+}
+
+.card-body strong {
+    font-weight: bold; /* Texto en negrita */
+}
+
+
+.loading-animation {
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+  }
+  
+  .dots {
+    animation: dot-blink 1.5s infinite;
+  }
+  
+  @keyframes blink {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes dot-blink {
+    0%, 20% {
+      content: '.';
+    }
+    40% {
+      content: '..';
+    }
+    60% {
+      content: '...';
+    }
+    100% {
+      content: '.';
+    }
+  }
