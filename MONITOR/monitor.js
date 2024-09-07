@@ -3,13 +3,13 @@ Vue.createApp({
       return {
         titulo: 'Monitor de sensores',
         parrafo: 'Esta página es un sistema de monitoreo web para obtener información importante acerca de la red, dispositivos conectados. Además de la información en tiempo real de una serie de sensores conectados al microcontrolador Arduino MEGA 2560. Todo esto para tener un control de una red domótica, para tener un control de que dispositivos podrían tener accesso a estos datos importantes.',
-        temperatura: '---',
+        temperatura: 'Buscando datos...',
         temperaturaGrafica: [],
-        humedad: '---',
+        humedad: 'Buscando datos...',
         humedadGrafica: [],
-        luz: '---',
+        luz: 'Buscando datos...',
         luzGrafica: [],
-        distancia: '---',
+        distancia: 'Buscando datos...',
         distanciaGrafica: [],
         red: 'Buscando red...'
       }
@@ -25,7 +25,7 @@ Vue.createApp({
           var contadorDesconocidos = 0;
   
           devices.forEach(device => {
-            if (device.device_type == "Desconocido" || device.device_type == "Unknown") {
+            if (device.vendor == "Desconocido" || device.vendor == "Unknown") {
               contadorDesconocidos++;
             }
               const card = document.createElement('div');
@@ -33,7 +33,7 @@ Vue.createApp({
   
               // Agregar contenido a la tarjeta
               card.innerHTML = `
-                  <div class="card-header">${device.device_type}</div>
+                  <div class="card-header">${device.vendor}</div>
                   <div class="card-body">
                       <p><strong>IP:</strong> ${device.ip}</p>
                       <p><strong>MAC:</strong> ${device.mac}</p>
@@ -62,6 +62,7 @@ Vue.createApp({
           this.humedadGrafica.push(data.humidity);
           this.distanciaGrafica.push(data.distance);
           this.luzGrafica.push(data.light);
+          
 
           TEMP = document.getElementById('chart_temp');
           Plotly.newPlot( TEMP, [{
@@ -95,7 +96,7 @@ Vue.createApp({
             this.red = nuevaRed;
             if (this.red !== 'Buscando red...') {
               notificacionSencilla(
-                `La red a la que está conectado actualmente es ${this.red}. Se recomienda que si usted tiene acceso a la administración de su punto de acceso, por favor mantenga una política de cambio de contraseña periódica para evitar dispositivos intrusos.`,
+                `La red a la que está conectado actualmente es ${this.red}. Se recomienda que si usted tiene acceso a la administración de su punto de acceso, por favor mantenga una política de cambio de contraseña periódica para evitar intrusiones.`,
                 "warning"
               );
             }

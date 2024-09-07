@@ -54,12 +54,20 @@
             <h2>Sensor DHT22</h2>
             <div class="feature-item">
                 <h3>Temperatura</h3>
-                <p>{{ temperatura }}</p>
+                <p v-if="temperatura === 'Buscando datos...'">
+                    <span class="loading-animation">Buscando datos</span>
+                    <span class="dots">...</span>
+                </p>
+                <p v-else>{{ temperatura }}</p>
                 <div id="chart_temp"></div>
             </div>
             <div class="feature-item">
                 <h3>Humedad</h3>
-                <p>{{ humedad }}</p>
+                <p v-if="humedad === 'Buscando datos...'">
+                    <span class="loading-animation">Buscando datos</span>
+                    <span class="dots">...</span>
+                </p>
+                <p v-else>{{ humedad }}</p>
                 <div id="chart_humed"></div>
             </div>
         </section>
@@ -68,7 +76,11 @@
             <h2>Sensor MD-SR04</h2>
             <div class="feature-item">
                 <h3>Proximidad</h3>
-                <p>{{ distancia }}</p>
+                <p v-if="distancia === 'Buscando datos...'">
+                    <span class="loading-animation">Buscando datos</span>
+                    <span class="dots">...</span>
+                </p>
+                <p v-else>{{ distancia }}</p>
                 <div id="chart_dist"></div>
             </div>
         </section>
@@ -77,7 +89,11 @@
             <h2>Sensor TSL-2561</h2>
             <div class="feature-item">
                 <h3>Luz</h3>
-                <p>{{ luz }}</p>
+                <p v-if="luz === 'Buscando datos...'">
+                    <span class="loading-animation">Buscando datos</span>
+                    <span class="dots">...</span>
+                </p>
+                <p v-else>{{ luz }}</p>
                 <div id="chart_luz"></div>
             </div>
         </section>
