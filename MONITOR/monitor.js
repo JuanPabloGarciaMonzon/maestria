@@ -11,27 +11,27 @@ Vue.createApp({
         luzGrafica: [],
         distancia: 'Buscando datos...',
         distanciaGrafica: [],
-        red: 'Buscando red...'
+        red: 'Buscando red...',
+        ssid: 'Buscando SSID...'
       }
     },
     mounted ()  {
       setInterval(this.obtenerRed, 5000);
-      setInterval(this.obtenerDatos, 1000);
+      //setInterval(this.obtenerDatos, 1000);
     },
     methods: {
-      llenarCards(devices) {
+      async llenarCards(devices) {
           const divTarjetas = document.getElementById('grupo_tarjetas');
-          divTarjetas.innerHTML = ''; // Limpiar el contenedor antes de agregar nuevas tarjetas
+          divTarjetas.innerHTML = '';
           var contadorDesconocidos = 0;
   
-          devices.forEach(device => {
+          devices.forEach(async device => {
             if (device.vendor == "Desconocido" || device.vendor == "Unknown") {
               contadorDesconocidos++;
             }
               const card = document.createElement('div');
               card.className = 'card';
   
-              // Agregar contenido a la tarjeta
               card.innerHTML = `
                   <div class="card-header">${device.vendor}</div>
                   <div class="card-body">
@@ -42,11 +42,84 @@ Vue.createApp({
                   </div>
               `;
               divTarjetas.appendChild(card);
+              await this.insertarConexion(device.vendor, device.mac, device.hostname, device.os_type, device.ip);
               Swal.close();
           });
           if (contadorDesconocidos > 0) {
             var mensaje = `Se encontraron ${contadorDesconocidos} dispositivos desconocidos. Se recomienda revisar sus dispositivos para evitar una intrusión.`;
             notificacionSencilla(mensaje, "warning");
+          }
+      },
+      async insertarConexion(vendor, mac, hostname, os_type, ip) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: `http://localhost:3000/insertarConexion?vendor=${vendor}&mac=${mac}&hostname=${hostname}&os_type=${os_type}&ip=${ip}`,
+                method: 'POST',
+                contentType: 'application/json',
+                processData: false,
+                success: (response) => {
+                    console.log("Conexion exitosa");
+                    resolve(response);  // Resolve the promise on success
+                },
+                error: (xhr, status, error) => {
+                    notificacionSencilla("Error al insertar la conexión", "error");
+                    console.error('Error en la solicitud:', error);
+                    reject(error);  // Reject the promise on error
+                }
+            });
+        });
+      },
+      async obtenerConexiones() {
+        DISPO = document.getElementById('chart_dispositivos');
+        var validacion = [];
+        try {
+          validacion = validacionObtenerConexiones();
+          if (validacion["estado"] == "false") {
+            notificacionSencilla(validacion["mensaje"], validacion["icono"]);
+          }
+          else {
+            var fecha = document.getElementById('fecha').value;
+            $.ajax({
+              url: `http://localhost:3000/obtenerConexionesPorDia?fecha=${fecha}`,
+              method: 'GET',
+              contentType: 'application/json',
+              processData: false,
+              success: (response) => {
+                console.log("Datos recibidos:", response);
+                if (response != "null") {
+                // Convertir la respuesta JSON en un objeto JavaScript
+                var datos = JSON.parse(response);
+                
+                // Extraer los nombres de proveedores y las cantidades para el histograma
+                const proveedores = datos.map(d => d.cantidad_conexiones);
+                const cantidades = datos.map(d => d.count);
+                
+                const trace = {
+                  x: proveedores,
+                  y: cantidades,
+                  type: 'bar', // Tipo de gráfico: histograma
+                  marker: {color: 'rgba(75, 192, 192, 1)'}
+                };
+        
+                const layout = {
+                  title: 'Conexiones de Dispositivo de fecha: ' + fecha,
+                  xaxis: {title: 'Dispositivo'},
+                  yaxis: {title: 'Número de Conexiones'}
+                };
+        
+                Plotly.newPlot(DISPO, [trace], layout);
+              } else {
+                notificacionSencilla("No se encontró información en esta fecha.", "warning");
+              }
+                },
+              error: (xhr, status, error) => {
+                  notificacionSencilla("Ha ocurrido un error al obtener los dispositivos.", "error");
+                  console.error('Error en la solicitud:', error);
+              }
+          });         
+          }
+          } catch (error) {
+            console.error('Error al obtener los dispositivos conectados', error);
           }
       },
       async obtenerDatos() {
@@ -92,13 +165,13 @@ Vue.createApp({
           const response = await fetch('http://localhost:5000/getNetwork');
           const data = await response.json();
           var nuevaRed = `${data.network}`;
-          if (this.red !== nuevaRed) {
+          var nuevaSSID = `${data.ssid}`;
+          if (this.red !== nuevaRed || this.ssid !== nuevaSSID) {
             this.red = nuevaRed;
+            this.ssid = nuevaSSID;
             if (this.red !== 'Buscando red...') {
-              notificacionSencilla(
-                `La red a la que está conectado actualmente es ${this.red}. Se recomienda que si usted tiene acceso a la administración de su punto de acceso, por favor mantenga una política de cambio de contraseña periódica para evitar intrusiones.`,
-                "warning"
-              );
+              mensaje = `La red a la que está conectado actualmente es ${this.ssid}. Se recomienda que si usted tiene acceso a la administración de su punto de acceso, por favor mantenga una política de cambio de contraseña periódica para evitar intrusiones.`;
+              notificacionSencilla(mensaje, "warning");
             }
           }
         } catch (error) {
@@ -119,11 +192,11 @@ Vue.createApp({
               if (response.devices && response.devices.length > 0) {
                 this.llenarCards(response.devices);
               } else {
-                notificacionSencilla("No se encontraron dispositivos.");
+                notificacionSencilla("No se encontraron dispositivos.", "warning");
               }
             },
             error: (xhr, status, error) => {
-                notificacionSencilla("Ha ocurrido un error al obtener los dispositivos.");
+                notificacionSencilla("Ha ocurrido un error al obtener los dispositivos.", "error");
                 console.error('Error en la solicitud:', error);
             }
         });

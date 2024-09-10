@@ -16,6 +16,11 @@ class ClaseDispositivos:
         network_cidr = f"{ip_network.network}/{cidr_prefix}"
         return network_cidr
 
+    def get_ssid(self):
+        result = subprocess.check_output('netsh wlan show interfaces').decode("utf-8")
+        ssid = (result.split("\n")[9].split(": ")[1]).strip()
+        return ssid
+
     def detect_os(self, ip):
         try:
             result = subprocess.check_output(['nmap', '-O', '-sS', ip], stderr=subprocess.STDOUT, universal_newlines=True)
@@ -38,15 +43,16 @@ class ClaseDispositivos:
         arp_request = ARP(pdst=ip)
         broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
         arp_request_broadcast = broadcast/arp_request
-        answered_list = srp(arp_request_broadcast, timeout=1, verbose=False)[0]
-        for send, received in answered_list:
-            return received.hwsrc
+        answered_list = srp(arp_request_broadcast, timeout=0.5, verbose=False)[0]
+        if answered_list:
+            return answered_list[0][1].hwsrc
         return None
 
     def detect_vendor(self, mac_address):
-        mac_address = mac_address.upper().replace(":", "").replace("-", "")
-        url = f"https://api.macvendors.com/{mac_address}"
         try:
+            if mac_address:
+                mac_address = mac_address.upper().replace(":", "").replace("-", "")
+            url = f"https://api.macvendors.com/{mac_address}"
             response = requests.get(url)
             if response.status_code == 200:
                 return response.text
@@ -60,13 +66,19 @@ class ClaseDispositivos:
         result = subprocess.check_output(['nmap', '-sn', ip_range], stderr=subprocess.STDOUT, universal_newlines=True)
         ip_pattern = r'Nmap scan report for (\d+\.\d+\.\d+\.\d+)'
         ips = re.findall(ip_pattern, result)
+        print(ips)
         devices = []
         for ip in ips:
-            hostname = self.detect_hostname(ip)
-            os_type = self.detect_os(ip)
             mac = self.detect_macs(ip)
-            vendor = self.detect_vendor(mac)
-            devices.append({'ip':ip, 'mac':mac, 'hostname':hostname, 'os_type':os_type, 'vendor':vendor})
+            print(mac)
+            if mac:
+                hostname = self.detect_hostname(ip)
+                print(hostname)
+                os_type = self.detect_os(ip)
+                print(os_type)
+                vendor = self.detect_vendor(mac)
+                print(vendor)
+                devices.append({'ip':ip, 'mac':mac, 'hostname':hostname, 'os_type':os_type, 'vendor':vendor})
         
         jsonReponse = json.dumps(devices, indent=4)
         print(jsonReponse)

@@ -17,7 +17,8 @@ def scan():
 @app.route('/getNetwork', methods=['GET'])
 def getNetwork():
     response = {
-        "network": dispositivos.get_network()
+        "network": dispositivos.get_network(),
+        "ssid": dispositivos.get_ssid()
     }
     return jsonify(response)
 
