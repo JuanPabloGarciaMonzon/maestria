@@ -17,9 +17,70 @@ Vue.createApp({
     },
     mounted ()  {
       setInterval(this.obtenerRed, 5000);
-      //setInterval(this.obtenerDatos, 1000);
+      setInterval(this.obtenerDatos, 1000);
+      flatpickr("#fecha", {
+        dateFormat: "d-m-Y",
+        altInput: true,
+        altFormat: "d-m-Y",
+        allowInput: true,
+        locale: "es"
+    });
+    flatpickr("#hora", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      locale: "es",
+      allowInput: true,
+  });
     },
     methods: {
+       formatearFecha(fecha) {
+        const partes = fecha.split("-");
+        const dia = partes[0];
+        const mes = partes[1];
+        const anio = partes[2];
+    
+        // Formatear a yyyy-mm-dd
+        return `${anio}-${mes}-${dia}`;
+      },
+      graficarPlot(x, y, tipoGrafico, titulo, tituloX, tituloY, div) {
+        const trace = {
+          x: x,
+          y: y,
+          type: tipoGrafico, // Tipo de gráfico: histograma
+          marker: {color: 'rgba(75, 192, 192, 1)'}
+        };
+
+        const layout = {
+          title: titulo,
+          xaxis: {
+            title: {
+                text: tituloX,
+                font: {
+                    size: 12 // Tamaño de la fuente del título del eje X
+                }
+            },
+            tickangle: 360, // Ajusta el ángulo de las etiquetas del eje X si es necesario
+            tickfont: {
+                size: 10 // Tamaño de la fuente de las etiquetas del eje X
+            }
+        },
+        yaxis: {
+            title: {
+                text: tituloY,
+                font: {
+                    size: 12 // Tamaño de la fuente del título del eje Y
+                }
+            },
+            tickfont: {
+                size: 10 // Tamaño de la fuente de las etiquetas del eje Y
+            }
+        }
+        };
+
+        Plotly.newPlot(div, [trace], layout);
+      },
       async llenarCards(devices) {
           const divTarjetas = document.getElementById('grupo_tarjetas');
           divTarjetas.innerHTML = '';
@@ -69,47 +130,85 @@ Vue.createApp({
             });
         });
       },
-      async obtenerConexiones() {
-        DISPO = document.getElementById('chart_dispositivos');
+      async obtenerConexionesPorFecha() {
         var validacion = [];
+        var grupoFecha = document.getElementById('grupo_fecha');
+        var grupoHora = document.getElementById('grupo_hora');
+        grupoFecha.hidden = false;
+        grupoHora.hidden = true;
         try {
-          validacion = validacionObtenerConexiones();
+          validacion = validacionObtenerConexionesPorFecha();
           if (validacion["estado"] == "false") {
             notificacionSencilla(validacion["mensaje"], validacion["icono"]);
           }
           else {
             var fecha = document.getElementById('fecha').value;
+            fecha = this.formatearFecha(fecha);
             $.ajax({
               url: `http://localhost:3000/obtenerConexionesPorDia?fecha=${fecha}`,
               method: 'GET',
               contentType: 'application/json',
               processData: false,
               success: (response) => {
-                console.log("Datos recibidos:", response);
                 if (response != "null") {
-                // Convertir la respuesta JSON en un objeto JavaScript
-                var datos = JSON.parse(response);
-                
-                // Extraer los nombres de proveedores y las cantidades para el histograma
-                const proveedores = datos.map(d => d.cantidad_conexiones);
-                const cantidades = datos.map(d => d.count);
-                
-                const trace = {
-                  x: proveedores,
-                  y: cantidades,
-                  type: 'bar', // Tipo de gráfico: histograma
-                  marker: {color: 'rgba(75, 192, 192, 1)'}
-                };
-        
-                const layout = {
-                  title: 'Conexiones de Dispositivo de fecha: ' + fecha,
-                  xaxis: {title: 'Dispositivo'},
-                  yaxis: {title: 'Número de Conexiones'}
-                };
-        
-                Plotly.newPlot(DISPO, [trace], layout);
+                  var datos = JSON.parse(response);
+                  const proveedores = datos.map(d =>  `${d.ipv4_host} - ${d.vendor_name}`);
+                  const cantidades = datos.map(d => d.count);
+                  var tipoGrafico = "bar";
+                  var titulo = "Dispositivos conectados por fecha: " + fecha; 
+                  var tituloX = "Dispositivos";
+                  var tituloY = "Cantidad de Conexiones";
+                  var div = document.getElementById('chart_dispositivos');
+                  this.graficarPlot(proveedores, cantidades, tipoGrafico, titulo, tituloX, tituloY, div);
               } else {
                 notificacionSencilla("No se encontró información en esta fecha.", "warning");
+              }
+                },
+              error: (xhr, status, error) => {
+                  notificacionSencilla("Ha ocurrido un error al obtener los dispositivos.", "error");
+                  console.error('Error en la solicitud:', error);
+              }
+          });         
+          }
+          } catch (error) {
+            console.error('Error al obtener los dispositivos conectados', error);
+          }
+      },
+      async obtenerConexionesPorFechayHora() {
+        var validacion = [];
+        var grupoFecha = document.getElementById('grupo_fecha');
+        var grupoHora = document.getElementById('grupo_hora');
+        grupoFecha.hidden = false;
+        grupoHora.hidden = false;
+        try {
+          var fecha = document.getElementById("fecha").value;
+          fecha = this.formatearFecha(fecha);
+          var hora = document.getElementById("hora").value;
+          validacion = validacionObtenerConexionesPorFechayHora();
+          if (validacion["estado"] == "false") {
+            notificacionSencilla(validacion["mensaje"], validacion["icono"]);
+          }
+          else {
+            $.ajax({
+              url: `http://localhost:3000/obtenerConexionesPorDiayHora?fecha=${fecha}&hora=${hora}`,
+              method: 'GET',
+              contentType: 'application/json',
+              processData: false,
+              success: (response) => {
+                if (response != "null") {
+                  var datos = JSON.parse(response);
+                  //var datos = response;
+                  console.log(datos);
+                  const proveedores = datos.map(d =>  `${d.ipv4_host} - ${d.vendor_name}`);
+                  const cantidades = datos.map(d => d.count);
+                  var tipoGrafico = "bar";
+                  var titulo = "Dispositivos conectados por fecha: " + fecha + " y hora: " + hora; 
+                  var tituloX = "Dispositivos";
+                  var tituloY = "Cantidad de Conexiones";
+                  var div = document.getElementById('chart_dispositivos');
+                  this.graficarPlot(proveedores , cantidades, tipoGrafico, titulo, tituloX, tituloY, div);
+              } else {
+                notificacionSencilla("No se encontró información en esta fecha y hora.", "warning");
               }
                 },
               error: (xhr, status, error) => {

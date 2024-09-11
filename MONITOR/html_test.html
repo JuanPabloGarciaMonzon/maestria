@@ -3,16 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Data Monitoring System</title>
+
     <link rel="stylesheet" href="monitor.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.9/dist/flatpickr.min.css">
+
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.0.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.9/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.9/dist/l10n/es.js"></script>
+
+    <style>
+        /* Estilo para reducir el tamaño del input */
+        #fecha {
+            width: 150px;   /* Ancho reducido del input */
+            padding: 5px;   /* Menor padding para hacerlo más compacto */
+            font-size: 14px; /* Tamaño de fuente ajustado */
+        }
+    </style>
+
   </head>
 <body>
     <header>
@@ -61,13 +78,37 @@
         </section>
 
         <section id="secEstadisticas">
-            <h2>Estadísticas de conexiones</h2>
-            <p>Por favor seleccionar para poder observar las conexiones de dispositivos seleccionar una fecha.</p>
+            <h2>Descripciones de conexiones</h2>
+            <p>Por favor seleccionar los siguientes filtros si desea generar una descripción de las conexiones.</p>
             <div class="feature-item">
-                <label for="fecha" class="form-label">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" class="form-input"/>
-                <div></div>
-                <button id="obtenerConexiones" @click="obtenerConexiones">Obtener Conexiones</button>
+                <button id="obtenerConexionesPorFecha" @click="obtenerConexionesPorFecha">Obtener Conexiones por Fecha</button>
+                <br>
+                <br>
+                <button id="obtenerConexionesPorFechayHora" @click="obtenerConexionesPorFechayHora">Obtener Conexiones por Fecha y Hora</button>
+                <br>
+                <br>
+                <div id="grupo_fecha" hidden>
+                    <label for="fecha" class="form-label">Fecha:</label>
+                    <div class="input-group date" id="datepicker">
+                        <input type="text" class="form-control" id="fecha" name="fecha" placeholder="dd-mm-yyyy">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div id="grupo_hora" hidden>
+                    <div class="input-group time" id="datepicker">
+                        <input type="text" class="form-control" id="hora" name="hora" placeholder="Hora">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <i class="fa fa-clock"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
                 <div id="chart_dispositivos"></div>
             </div>
         </section>
